@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<script
+src="https://code.jquery.com/jquery-3.2.1.min.js"
+integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+crossorigin="anonymous"></script>
+<script src="https://unpkg.com/vue"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sprintf/1.1.0/sprintf.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script type="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style>
+
+    .char {
+        color: #337ab7;
+    }
+
+    .jumbotron {
+        background-color: #559cd9;
+        color: #ffffff;
+    }
+
+    #calc {
+        margin-bottom: 15px;
+    }
+
+
+    #calc input {
+        text-align: center;
+    }
+
+    #ascii-table {
+        width:412px;
+        margin:0 auto;
+        margin-top: 5px;
+    }
+
+    #ascii-table tr th {
+        text-align: center;
+        font-weight: normal;
+    }
+
+    #ascii-table tr td {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    #ascii-table tr:not(:first-child):hover {
+        background-color: #97ffff;
+    }
+
+    #ascii-table tr:first-child {
+
+    }
+
+    #ascii-table table {
+       width: 90px;
+       margin: 3px;
+       outline: 1px solid black;
+       float: left;
+   }
+
+   @media(max-width:507px){
+    #ascii-table {
+        width:205px;
+    }
+}
+
+
+
+
+</style>
+<script>
+
+    $( () => {
+
+        $('#char').keydown( () => { $('#char').val(''); });
+        $('#char').keyup(ConvertChar);
+        $('#dec').keyup(ConvertDec);
+        $('#hex').keyup(ConvertHex);
+        $('#bin').keyup(ConvertBin);
+
+        $('#char').val('a');
+        ConvertChar();
+    });
+
+    function clear(c){
+        $('#char').val("");
+        $('#hex').val("");
+        $('#bin').val("");
+        $('#dec').val("");
+        $('#html').val("");
+        $('#escape').val("");
+        set(-1);
+    }
+
+    let prev;
+    function set(d){
+        $("#" + prev).css("background-color", "#ffffff");
+        $("#" + d).css("background-color", "#abcdef");
+        prev = d;
+    }
+
+    function GetEscape(d,h) {
+        let code = '\\x'+h;
+        if( d==0 ) code='\\0';
+        if( d==7 ) code='\\a';
+        if( d==8 ) code='\\b';
+        if( d==9 ) code='\\t';
+        if( d==10 ) code='\\n';
+        if( d==11 ) code='\\v';
+        if( d==12 ) code='\\f';
+        if( d==13 ) code='\\r';
+        if( d==34 ) code='\\\"';
+        if( d==39 ) code='\\\'';
+        if( d==63 ) code='\\\?';
+        if( d==92 ) code='\\\\';
+        return code;
+    }
+
+    function ConvertChar() {
+        var c = $('#char').val();
+        if(c=='') return clear();
+        var d = c.charCodeAt(0);
+        $('#dec').val(d);
+        var h=d.toString(16).toUpperCase();
+        var b=d.toString(2);
+        while( b.length<8 ) b = "0"+b;
+        $('#hex').val(h);
+        $('#bin').val(b);
+        $('#html').val('&#'+d+';');
+        $('#escape').val(GetEscape(d,h));
+        set(d); 
+    }
+
+    function ConvertDec() {
+        var d = $('#dec').val();
+        if(d=='') return clear();
+        d = parseInt(d);
+        if(d>255 || d<0) return;
+        var c = String.fromCharCode(d);
+        $('#char').val(c);
+        var h=d.toString(16).toUpperCase();
+        while( h.length<2 ) h = "0"+h;
+        var b=d.toString(2);
+        while( b.length<8 ) b = "0"+b;
+        $('#hex').val(h);
+        $('#bin').val(b);
+        $('#html').val('&#'+d+';');
+        $('#escape').val(GetEscape(d,h));
+        set(d); 
+    }
+
+    function ConvertHex() {
+        var h = $('#hex').val();
+        if (h == "") return clear();
+        while( h.length<2 ) h = "0"+h;
+        if(h.length!=2) return;
+        var d = parseInt(h,16);
+        if(d>255 || d<0) return;
+        var c = String.fromCharCode(d);
+        $('#char').val(c);
+        h=d.toString(16).toUpperCase();
+        while( h.length<2 ) h = "0"+h;
+        var b=d.toString(2);
+        while( b.length<8 ) b = "0"+b;
+        $('#dec').val(d);
+        //$('#hex').val(h);
+        $('#bin').val(b);
+        $('#html').val('&#'+d+';');
+        $('#escape').val(GetEscape(d,h));
+        set(d); 
+    }   
+
+    function ConvertBin() {
+        var b = $('#bin').val();
+        if (b == "") return clear();
+        if(b.length>8) return;
+        if(b.length==0) return;
+        d = parseInt(b,2);
+        if(d>255 || d<0) return;
+        c = String.fromCharCode(d);
+        $('#char').val(c);
+        var h=d.toString(16).toUpperCase();
+        while( h.length<2 ) h = "0"+h;
+        b=d.toString(2);
+        while( b.length<8 ) b = "0"+b;
+        $('#dec').val(d);
+        $('#hex').val(h);
+        //$('#bin').val(b);
+        $('#html').val('&#'+d+';');
+        $('#escape').val(GetEscape(d,h));
+        set(d); 
+    }
+</script>
+<head>
+    <title>Ascii Table</title>
+</head>
+<body>
+
+    <div id='app'>
+        <div class="container">
+            <h1 class="jumbotron text-center col-xs-12"> ASCII TABLE </h1>
+
+                <div class="row" id="calc">
+                  <div class="col-xs-3"></div>
+                  <div class="col-xs-6">
+                      <div class="row">
+                        <div class="label label-primary col-xs-4">Char</div>
+                        <div class="label label-info col-xs-4">HTML Code</div>
+                        <div class="label label-info col-xs-4">Escape</div>
+                      </div>
+                      <div class="row">
+                          <input id="char" class="col-xs-4"></input>
+                          <input id="html" class="col-xs-4" readonly=""></input>
+                          <input id="escape" class="col-xs-4" readonly=""></input>
+                      </div>
+                      <div class="row">
+                          <div class="label label-primary col-xs-4">Decimal</div>
+                          <div class="label label-primary col-xs-4">Hex</div>
+                          <div class="label label-primary col-xs-4">Binary</div>
+                      </div>
+                      <div class="row">
+                          <input id="dec" class="col-xs-4"></input>
+                          <input id="hex" class="col-xs-4"></input>
+                          <input id="bin" class="col-xs-4"></input>
+                      </div>
+                  </div>
+                  <div class="col-xs-6"></div>
+                  </div>
+
+            <div class="col-xs-12">
+                <div id='ascii-table'>
+                    <div v-for="code in codes">
+                        <table class="ascii">
+                            <tr>
+                                <th>dec</th>
+                                <th>hex</th>
+                                <th>char</th>
+                            </tr>
+
+                            <tr v-for="char in code" :id="char.dec">
+                                <td v-for="prop in [ char.dec, char.hex, char.symbol, ]" data-toggle="tooltip" v-bind:title="char.description"
+                                data-delay='{"show": "1", "hide": "1"}'>
+                                <span :class="isChar(char, prop)">
+                                    {{ prop }}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+</div>
+
+</body>
+<script>
+    const codes = new Array(128);
+
+    codes [0] =  {symbol: "NUL", description: "Null char"};
+    codes [1] =  {symbol: "SOH", description: "Start of Heading"};
+    codes [2] =  {symbol: "STX", description: "Start of Text"};
+    codes [3] =  {symbol: "ETX", description: "End of Text"};
+    codes [4] =  {symbol: "EOT", description: "End of Transmission"};
+    codes [5] =  {symbol: "ENQ", description: "Enquiry"};
+    codes [6] =  {symbol: "ACK", description: "Acknowledgment"};
+    codes [7] =  {symbol: "BEL", description: "Bell"};
+    codes [8] =  {symbol: "BS ", description: "Back Space"};
+    codes [9] =  {symbol: "HT ", description: "Horizontal Tab"};
+    codes[10] =  {symbol: "LF ", description: "Line Feed"};
+    codes[11] =  {symbol: "VT ", description: "Vertical Tab"};
+    codes[12] =  {symbol: "FF ", description: "Form Feed"};
+    codes[13] =  {symbol: "CR ", description: "Carriage Return"};
+    codes[14] =  {symbol: "SO ", description: "Shift Out / X-On"};
+    codes[15] =  {symbol: "SI ", description: "Shift In / X-Off"};
+    codes[16] =  {symbol: "DLE", description: "Data Line Escape"};
+    codes[17] =  {symbol: "DC1", description: "Device Control 1 (oft. XON)"};
+    codes[18] =  {symbol: "DC2", description: "Device Control 2"};
+    codes[19] =  {symbol: "DC3", description: "Device Control 3 (oft. XOFF)"};
+    codes[20] =  {symbol: "DC4", description: "Device Control 4"};
+    codes[21] =  {symbol: "NAK", description: "Negative Acknowledgement"};
+    codes[22] =  {symbol: "SYN", description: "Synchronous Idle"};
+    codes[23] =  {symbol: "ETB", description: "End of Transmit Block"};
+    codes[24] =  {symbol: "CAN", description: "Cancel"};
+    codes[25] =  {symbol: "EM ", description: "End of Medium"};
+    codes[26] =  {symbol: "SUB", description: "Substitute"};
+    codes[27] =  {symbol: "ESC", description: "Escape"};
+    codes[28] =  {symbol: "FS ", description: "File Separator"};
+    codes[29] =  {symbol: "GS ", description: "Group Separator"};
+    codes[30] =  {symbol: "RS ", description: "Record Separator"};
+    codes[31] =  {symbol: "US ", description: "Unit Separator"};
+    codes[32] =  {symbol: "space" };
+    codes[127] = {symbol: "DEL"  };
+
+    for (let i = 0; i < 128; i++){
+        codes[i] = codes[i] || {
+            symbol: String.fromCharCode(i),
+        }
+        codes[i].dec = i;
+        codes[i].hex = sprintf("%x", i);
+        codes[i].html = sprintf("&#%03d;", i);
+        codes[i].oct = sprintf("%o", i);
+        if (codes[i].symbol.length > 1){
+            const escape = GetEscape(codes[i].dec, codes[i].hex);
+            if (escape.length <= 2){
+                codes[i].symbol = escape;
+            }
+        }
+    }
+
+    const TABLE_WIDTH = $('#ascii-table table').width() + 8;
+    let prevCols;
+    let numCols;
+
+    window.onresize = () => {
+        const windowWidth = $(window).width();
+        numCols = windowWidth > 900 ? 8 : windowWidth > 500 ? 4 : 2;
+        if ( !prevCols || prevCols !== numCols ){
+            prevCols = numCols;   
+            $('#ascii-table').width( TABLE_WIDTH * numCols );
+            if (!init){
+                vm.codes = _.chunk(codes, Math.ceil(128 / numCols));
+            }   
+        }
+    }
+
+    let init = true;
+    window.onresize();
+    init = false;
+
+
+    const vm = new Vue({
+        el: '#app',
+        data: {
+            codes: _.chunk(codes, Math.ceil(128 / numCols)),
+            isChar: (char, prop) => {
+                return char.symbol === prop ? "char"
+                :  char.dec === prop ? "dec"
+                :  char.hex === prop ? "hex"
+                :  "html";
+            }
+        },
+    });
+
+
+
+</script>
+</html>
